@@ -176,6 +176,7 @@ npm run service:stop          # 停止服务
 - `REDIS_PASSWORD`: Redis密码（可选）
 
 #### 新增重要环境变量（可选）
+- `ADMIN_PATH`: 管理界面路径（默认 `/admin-next`，建议设置为难以猜测的路径如 `/my-secret-panel-a8k2x` 以提高安全性，修改后需运行 `npm run build:web` 重新构建前端）
 - `USER_MANAGEMENT_ENABLED`: 启用用户管理系统（默认false）
 - `LDAP_ENABLED`: 启用LDAP认证（默认false）
 - `LDAP_URL`: LDAP服务器地址（如 ldaps://ldap.example.com:636）

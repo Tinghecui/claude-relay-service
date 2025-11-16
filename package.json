@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run lint && node src/app.js",
     "dev": "nodemon",
-    "build:web": "cd web/admin-spa && npm run build",
+    "build:web": "node scripts/build-web.js",
     "install:web": "cd web/admin-spa && npm install",
     "update:pricing": "node scripts/update-model-pricing.js",
     "setup": "node scripts/setup.js",

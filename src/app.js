@@ -90,10 +90,13 @@ class Application {
       const cronScheduler = require('./services/cronScheduler')
       await cronScheduler.initialize()
 
-      // 超早期拦截 /admin-next/ 请求 - 在所有中间件之前
+      // 超早期拦截管理界面请求 - 在所有中间件之前
+      const adminPath = config.web.adminPath || '/admin-next'
+      const adminPathWithSlash = adminPath.endsWith('/') ? adminPath : `${adminPath}/`
+
       this.app.use((req, res, next) => {
-        if (req.path === '/admin-next/' && req.method === 'GET') {
-          logger.warn('🚨 INTERCEPTING /admin-next/ request at the very beginning!')
+        if (req.path === adminPathWithSlash && req.method === 'GET') {
+          logger.warn(`🚨 INTERCEPTING ${adminPathWithSlash} request at the very beginning!`)
           const adminSpaPath = path.join(__dirname, '..', 'web', 'admin-spa', 'dist')
           const indexPath = path.join(adminSpaPath, 'index.html')
 
@@ -182,9 +185,9 @@ class Application {
         this.app.set('trust proxy', 1)
       }
 
-      // 调试中间件 - 拦截所有 /admin-next 请求
+      // 调试中间件 - 拦截所有管理界面请求
       this.app.use((req, res, next) => {
-        if (req.path.startsWith('/admin-next')) {
+        if (req.path.startsWith(adminPath)) {
           logger.info(
             `🔍 DEBUG: Incoming request - method: ${req.method}, path: ${req.path}, originalUrl: ${req.originalUrl}`
           )
@@ -196,13 +199,13 @@ class Application {
       const adminSpaPath = path.join(__dirname, '..', 'web', 'admin-spa', 'dist')
       if (fs.existsSync(adminSpaPath)) {
         // 处理不带斜杠的路径，重定向到带斜杠的路径
-        this.app.get('/admin-next', (req, res) => {
-          res.redirect(301, '/admin-next/')
+        this.app.get(adminPath, (req, res) => {
+          res.redirect(301, adminPathWithSlash)
         })
 
         // 使用 all 方法确保捕获所有 HTTP 方法
-        this.app.all('/admin-next/', (req, res) => {
-          logger.info('🎯 HIT: /admin-next/ route handler triggered!')
+        this.app.all(adminPathWithSlash, (req, res) => {
+          logger.info(`🎯 HIT: ${adminPathWithSlash} route handler triggered!`)
           logger.info(`Method: ${req.method}, Path: ${req.path}, URL: ${req.url}`)
 
           if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -213,15 +216,15 @@ class Application {
           res.sendFile(path.join(adminSpaPath, 'index.html'))
         })
 
-        // 处理所有其他 /admin-next/* 路径（但排除根路径）
-        this.app.get('/admin-next/*', (req, res) => {
+        // 处理所有其他管理界面子路径（但排除根路径）
+        this.app.get(`${adminPath}/*`, (req, res) => {
           // 如果是根路径，跳过（应该由上面的路由处理）
-          if (req.path === '/admin-next/') {
-            logger.error('❌ ERROR: /admin-next/ should not reach here!')
+          if (req.path === adminPathWithSlash) {
+            logger.error(`❌ ERROR: ${adminPathWithSlash} should not reach here!`)
             return res.status(500).send('Route configuration error')
           }
 
-          const requestPath = req.path.replace('/admin-next/', '')
+          const requestPath = req.path.replace(`${adminPath}/`, '')
 
           // 安全检查
           if (
@@ -255,9 +258,9 @@ class Application {
           res.sendFile(path.join(adminSpaPath, 'index.html'))
         })
 
-        logger.info('✅ Admin SPA (next) static files mounted at /admin-next/')
+        logger.info(`✅ Admin SPA static files mounted at ${adminPath}/`)
       } else {
-        logger.warn('⚠️ Admin SPA dist directory not found, skipping /admin-next route')
+        logger.warn(`⚠️ Admin SPA dist directory not found, skipping ${adminPath} route`)
       }
 
       // 🛣️ 路由
@@ -281,9 +284,9 @@ class Application {
       this.app.use('/azure', azureOpenaiRoutes)
       this.app.use('/admin/webhook', webhookRoutes)
 
-      // 🏠 根路径重定向到新版管理界面
+      // 🏠 根路径重定向到管理界面
       this.app.get('/', (req, res) => {
-        res.redirect('/admin-next/api-stats')
+        res.redirect(`${adminPath}/api-stats`)
       })
 
       // 🏥 增强的健康检查端点
@@ -467,12 +470,13 @@ class Application {
     try {
       await this.initialize()
 
+      const adminPath = config.web.adminPath || '/admin-next'
       this.server = this.app.listen(config.server.port, config.server.host, () => {
         logger.start(
           `🚀 Claude Relay Service started on ${config.server.host}:${config.server.port}`
         )
         logger.info(
-          `🌐 Web interface: http://${config.server.host}:${config.server.port}/admin-next/api-stats`
+          `🌐 Web interface: http://${config.server.host}:${config.server.port}${adminPath}/api-stats`
         )
         logger.info(
           `🔗 API endpoint: http://${config.server.host}:${config.server.port}/api/v1/messages`

@@ -110,7 +110,10 @@ const config = {
       'Multi-account Claude API relay service with beautiful management interface',
     logoUrl: process.env.WEB_LOGO_URL || '/assets/logo.png',
     enableCors: process.env.ENABLE_CORS === 'true',
-    sessionSecret: process.env.WEB_SESSION_SECRET || 'CHANGE-THIS-SESSION-SECRET'
+    sessionSecret: process.env.WEB_SESSION_SECRET || 'CHANGE-THIS-SESSION-SECRET',
+    // 🔒 管理界面路径（可自定义以提高安全性）
+    // 默认 /admin-next，建议设置为难以猜测的路径（如 /my-secret-panel-a8k2x）
+    adminPath: process.env.ADMIN_PATH || '/admin-next'
   },
 
   // 🔐 LDAP 认证配置
