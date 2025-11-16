@@ -112,8 +112,9 @@ const config = {
     enableCors: process.env.ENABLE_CORS === 'true',
     sessionSecret: process.env.WEB_SESSION_SECRET || 'CHANGE-THIS-SESSION-SECRET',
     // 🔒 管理界面路径（可自定义以提高安全性）
-    // 默认 /admin-next，建议设置为难以猜测的路径（如 /my-secret-panel-a8k2x）
-    adminPath: process.env.ADMIN_PATH || '/admin-next'
+    // 默认使用随机路径以提高安全性，建议在 .env 中设置自定义路径
+    // 示例：ADMIN_PATH=/my-secret-panel-a8k2x
+    adminPath: process.env.ADMIN_PATH || '/admin-panel-x7k9m2s5'
   },
 
   // 🔐 LDAP 认证配置

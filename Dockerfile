@@ -1,6 +1,9 @@
 # 🎯 前端构建阶段
 FROM node:18-alpine AS frontend-builder
 
+# 🔒 构建参数：管理界面路径（默认随机路径提高安全性）
+ARG VITE_APP_BASE_URL=/admin-panel-x7k9m2s5
+
 # 📁 设置工作目录
 WORKDIR /app/web/admin-spa
 
@@ -13,8 +16,8 @@ RUN npm ci
 # 📋 复制前端源代码
 COPY web/admin-spa/ ./
 
-# 🏗️ 构建前端
-RUN npm run build
+# 🏗️ 构建前端（使用构建参数）
+RUN VITE_APP_BASE_URL=${VITE_APP_BASE_URL} npm run build
 
 # 🐳 主应用阶段
 FROM node:18-alpine
